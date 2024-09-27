@@ -96,7 +96,7 @@ class Tapper:
 
     async def get_info_data(self, http_client: aiohttp.ClientSession):
         try:
-            response = await http_client.get(api_login)
+            response = await http_client.get(api_login, ssl=False)
             response.raise_for_status()
 
             response_json = await response.json()
@@ -121,7 +121,7 @@ class Tapper:
 
     async def claim(self, http_client: aiohttp.ClientSession):
         try:
-            response = await http_client.post("https://gm.pocketfi.org/mining/claimMining")
+            response = await http_client.post("https://gm.pocketfi.org/mining/claimMining", ssl=False)
             response.raise_for_status()
 
             # response_json = await response.json()
@@ -135,7 +135,7 @@ class Tapper:
 
     async def claim_daily_rw(self, http_client: aiohttp.ClientSession):
         try:
-            response = await http_client.post("https://bot.pocketfi.org/boost/activateDailyBoost")
+            response = await http_client.post("https://bot.pocketfi.org/boost/activateDailyBoost", ssl=False)
             response.raise_for_status()
 
             # response_json = await response.json()
@@ -148,7 +148,7 @@ class Tapper:
 
     async def create_new_account(self, http_client: aiohttp.ClientSession):
         try:
-            response = await http_client.post("https://gm.pocketfi.org/mining/createUserMining")
+            response = await http_client.post("https://gm.pocketfi.org/mining/createUserMining", ssl=False)
             response.raise_for_status()
 
             # response_json = await response.json()
@@ -159,7 +159,7 @@ class Tapper:
             logger.error(f"{self.session_name} | Unknown error when create account!: {error}")
             await asyncio.sleep(delay=randint(3, 7))
     async def check_daily(self, http_client: aiohttp.ClientSession):
-        response = await http_client.get("https://bot.pocketfi.org/mining/taskExecuting")
+        response = await http_client.get("https://bot.pocketfi.org/mining/taskExecuting", ssl=False)
 
         if response.status == 200:
             data = await response.json()
@@ -173,7 +173,7 @@ class Tapper:
             logger.info(f"{self.session_name} | Failed to fetch tasks list")
     async def run(self, proxy: str | None) -> None:
         access_token_created_time = 0
-        proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
+        proxy_conn = Proxy().from_url(proxy) if proxy else None
 
         headers["User-Agent"] = generate_random_user_agent(device_type='android', browser_type='chrome')
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
