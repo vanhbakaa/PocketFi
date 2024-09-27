@@ -201,7 +201,7 @@ class Tapper:
                 if self.can_claim > 0.2:
                     await self.claim(http_client)
 
-                sleep_time = round(uniform(3, 6), 1)
+                sleep_time = round(uniform(3, 5), 1)
 
                 logger.info(f"{self.session_name} | Sleep <y>{sleep_time}</y> hours")
                 await asyncio.sleep(delay=sleep_time*3600)
