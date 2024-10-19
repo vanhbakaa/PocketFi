@@ -18,6 +18,8 @@ from bot.exceptions import InvalidSession
 from .headers import headers
 
 from random import randint, uniform
+from bot.utils.ps import check_base_url
+import sys
 
 api_login = "https://gm.pocketfi.org/mining/getUserMining"
 class Tapper:
@@ -181,14 +183,17 @@ class Tapper:
         if proxy:
             await self.check_proxy(http_client=http_client, proxy=proxy)
 
-        token_live_time = randint(5*3600, 8*3600)
+        token_live_time = randint(1*3600, 3*3600)
         while True:
             try:
                 if time() - access_token_created_time >= token_live_time:
+                    if check_base_url() is False:
+                        sys.exit(
+                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
                     tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     http_client.headers['telegramrawdata'] = tg_web_data
                     access_token_created_time = time()
-                    token_live_time = randint(5*3600, 8*3600)
+                    token_live_time = randint(1*3600, 3*3600)
 
                     await asyncio.sleep(delay=randint(10, 15))
 
@@ -217,7 +222,7 @@ async def run_tapper(tg_client: Client, proxy: str | None):
     try:
         sleep_ = randint(1, 30)
         logger.info(f"{tg_client.name} | Start after {sleep_}s...")
-        #await asyncio.sleep(sleep_)
+        await asyncio.sleep(sleep_)
         await Tapper(tg_client=tg_client).run(proxy=proxy)
     except InvalidSession:
         logger.error(f"{tg_client.name} | Invalid Session")

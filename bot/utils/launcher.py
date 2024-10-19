@@ -11,6 +11,8 @@ from bot.config import settings
 from bot.utils import logger
 from bot.core.tapper import run_tapper
 from bot.core.registrator import register_sessions
+from .ps import check_base_url
+import sys
 
 
 start_text = """
@@ -71,6 +73,9 @@ async def get_tg_clients() -> list[Client]:
 async def process() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
+    if check_base_url() is False:
+        sys.exit(
+            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
 
     logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
 
