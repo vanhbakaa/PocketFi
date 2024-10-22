@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     API_ID: int
     API_HASH: str
 
+    ADVANCED_CHECKER: bool = True
+
     REF_LINK: str = "https://t.me/pocketfi_bot/Mining?startapp=6624523270"
 
     USE_PROXY_FROM_FILE: bool = False
