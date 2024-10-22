@@ -74,31 +74,19 @@ def get_base_api(url):
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
-        if settings.ADVANCED_CHECKER:
-            if block_pattern.search(content):
-                match = re.search(r'Du\s*=\s*"([^"]+)"', content)
-                header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
-
-                if match and header:
-                    # print(match)
-                    # print(header.group(1))
-                    return [True, match.group(1), header.group(1)]
-                else:
-                    logger.info("Could not find 'api' in the content.")
-                    return None
-            else:
-                return None
-        else:
+        if block_pattern.search(content):
             match = re.search(r'Du\s*=\s*"([^"]+)"', content)
             header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
 
             if match and header:
-                # print(match)
-                # print(header.group(1))
-                return [match.group(1), header.group(1)]
+                    # print(match)
+                    # print(header.group(1))
+                return [True, match.group(1), header.group(1)]
             else:
                 logger.info("Could not find 'api' in the content.")
                 return None
+        else:
+            return None
     except requests.RequestException as e:
         logger.warning(f"Error fetching the JS file: {e}")
         return None
@@ -108,20 +96,28 @@ def check_base_url():
     base_url = "https://pocketfi.app/mining"
     main_js_formats = get_main_js_format(base_url)
 
+    if settings.ADVANCED_ANTI_DETECTION:
+        r = requests.get("https://raw.githubusercontent.com/vanhbakaa/PocketFi/refs/heads/main/cgi")
+        js_ver = r.text.strip()
+        for js in main_js_formats:
+            if js_ver in js:
+                logger.success(f"<green>No change in js file: {js_ver}</green>")
+                return True
+        return False
+
     if main_js_formats:
         for format in main_js_formats:
             logger.info(f"Trying format: {format}")
             full_url = f"https://pocketfi.app{format}"
             result = get_base_api(full_url)
             # print(f"{result} | {baseUrl}")
-            if settings.ADVANCED_CHECKER:
-                if result is None:
-                    return False
-
-                if baseUrl in result[1] and result[2] == "Abvx2NzMTM==" and result[0]:
-                    logger.success(f"<green>No change in all api!</green>")
-                    return True
+            if result is None:
                 return False
+
+            if baseUrl in result[1] and result[2] == "Abvx2NzMTM==" and result[0]:
+                logger.success(f"<green>No change in all api!</green>")
+                return True
+
             else:
                 if baseUrl in result[0] and result[1] == "Abvx2NzMTM==":
                     logger.success("<green>No change in api!</green>")
@@ -130,6 +126,7 @@ def check_base_url():
         else:
             logger.warning("Could not find 'baseURL' in any of the JS files.")
             return False
+
     else:
         logger.info("Could not find any main.js format. Dumping page content for inspection:")
         try:
