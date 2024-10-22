@@ -161,7 +161,7 @@ class Tapper:
             logger.error(f"{self.session_name} | Unknown error when create account!: {error}")
             await asyncio.sleep(delay=randint(3, 7))
     async def check_daily(self, http_client: aiohttp.ClientSession):
-        response = await http_client.get("https://bot.pocketfi.org/boost/tasks?boostType=general", ssl=False)
+        response = await http_client.get("https://bot.pocketfi.org/mining/taskExecuting", ssl=False)
 
         if response.status == 200:
             data = await response.json()
@@ -187,15 +187,20 @@ class Tapper:
         while True:
             try:
                 if time() - access_token_created_time >= token_live_time:
-                    if check_base_url() is False:
-                        sys.exit(
-                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
                     tg_web_data = await self.get_tg_web_data(proxy=proxy)
                     http_client.headers['telegramrawdata'] = tg_web_data
                     access_token_created_time = time()
                     token_live_time = randint(1*3600, 3*3600)
 
                     await asyncio.sleep(delay=randint(10, 15))
+
+                if check_base_url() is False:
+                    if settings.ADVANCED_ANTI_DETECTION:
+                        sys.exit(
+                            "Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa")
+                    else:
+                        sys.exit(
+                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
 
                 await self.get_info_data(http_client)
                 if self.new_account is True:
