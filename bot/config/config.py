@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     API_ID: int
     API_HASH: str
 
-    ADVANCED_CHECKER: bool = True
+    ADVANCED_ANTI_DETECTION: bool = False
 
     REF_LINK: str = "https://t.me/pocketfi_bot/Mining?startapp=6624523270"
 
