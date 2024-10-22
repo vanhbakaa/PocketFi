@@ -1,4 +1,3 @@
-import difflib
 from bot.config import settings
 import requests
 import re
@@ -77,10 +76,18 @@ def get_base_api(url):
         content = response.text
         if settings.ADVANCED_CHECKER:
             if block_pattern.search(content):
-                logger.success(f"<green>No change in all api!</green>")
-                return True
+                match = re.search(r'Du\s*=\s*"([^"]+)"', content)
+                header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
+
+                if match and header:
+                    # print(match)
+                    # print(header.group(1))
+                    return [True, match.group(1), header.group(1)]
+                else:
+                    logger.info("Could not find 'api' in the content.")
+                    return None
             else:
-                return False
+                return None
         else:
             match = re.search(r'Du\s*=\s*"([^"]+)"', content)
             header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
@@ -108,7 +115,13 @@ def check_base_url():
             result = get_base_api(full_url)
             # print(f"{result} | {baseUrl}")
             if settings.ADVANCED_CHECKER:
-                return result
+                if result is None:
+                    return False
+
+                if baseUrl in result[1] and result[2] == "Abvx2NzMTM==" and result[0]:
+                    logger.success(f"<green>No change in all api!</green>")
+                    return True
+                return False
             else:
                 if baseUrl in result[0] and result[1] == "Abvx2NzMTM==":
                     logger.success("<green>No change in api!</green>")
