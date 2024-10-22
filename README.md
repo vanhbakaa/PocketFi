@@ -22,7 +22,7 @@
 |----------------------------|:-------------------------------------------------------------------------------------------------------------:|
 | **API_ID / API_HASH**      | Platform data from which to run the Telegram session (default - android)                                      |
 | **REF_LINK**               | auto register with your ref link (default: my ref link)                                                       |
-| **ADVANCED_CHECKER**        | Reduce chance of being banned (default: True)                                                       |
+| **ADVANCED_ANTI_DETECTION** | Reduce chance of being banned (default: False)                                                       |
 | **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
