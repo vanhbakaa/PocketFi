@@ -73,14 +73,6 @@ async def get_tg_clients() -> list[Client]:
 async def process() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
-    if check_base_url() is False:
-        if settings.ADVANCED_ANTI_DETECTION:
-            sys.exit(
-                "Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa")
-        else:
-            sys.exit(
-                "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
-
     logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
 
     action = parser.parse_args().action
