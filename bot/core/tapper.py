@@ -185,36 +185,42 @@ class Tapper:
 
         token_live_time = randint(1*3600, 3*3600)
         while True:
+            can_run = True
             try:
-                if time() - access_token_created_time >= token_live_time:
-                    tg_web_data = await self.get_tg_web_data(proxy=proxy)
-                    http_client.headers['telegramrawdata'] = tg_web_data
-                    access_token_created_time = time()
-                    token_live_time = randint(1*3600, 3*3600)
-
-                    await asyncio.sleep(delay=randint(10, 15))
-
                 if check_base_url() is False:
+                    can_run = False
                     if settings.ADVANCED_ANTI_DETECTION:
-                        sys.exit(
-                            "Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa")
+                        logger.warning(
+                            "<yellow>Detected index js file change. Contact me to check if it's safe to continue: https://t.me/vanhbakaaa</yellow>")
                     else:
-                        sys.exit(
-                            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa")
+                        logger.warning(
+                            "<yellow>Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/vanhbakaaa</yellow>")
 
-                await self.get_info_data(http_client)
-                if self.new_account is True:
-                    await self.create_new_account(http_client)
-                    await asyncio.sleep(1)
+                if can_run:
+                    if time() - access_token_created_time >= token_live_time:
+                        tg_web_data = await self.get_tg_web_data(proxy=proxy)
+                        http_client.headers['telegramrawdata'] = tg_web_data
+                        access_token_created_time = time()
+                        token_live_time = randint(1*3600, 3*3600)
+    
+                        await asyncio.sleep(delay=randint(10, 15))
+    
                     await self.get_info_data(http_client)
-                await self.check_daily(http_client)
-                if self.can_claim > 0.2:
-                    await self.claim(http_client)
-
-                sleep_time = round(uniform(2, 4), 1)
-
-                logger.info(f"{self.session_name} | Sleep <y>{sleep_time}</y> hours")
-                await asyncio.sleep(delay=sleep_time*3600)
+                    if self.new_account is True:
+                        await self.create_new_account(http_client)
+                        await asyncio.sleep(1)
+                        await self.get_info_data(http_client)
+                    await self.check_daily(http_client)
+                    if self.can_claim > 0.2:
+                        await self.claim(http_client)
+    
+                    sleep_time = round(uniform(2, 4), 1)
+    
+                    logger.info(f"{self.session_name} | Sleep <y>{sleep_time}</y> hours")
+                    await asyncio.sleep(delay=sleep_time*3600)
+                else:
+                    await asyncio.sleep(120)
+                    logger.info(f"{self.session_name} | Sleep <y>{120}</y> seconds...")
             except InvalidSession as error:
                 raise error
 
