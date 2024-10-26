@@ -75,7 +75,7 @@ def get_base_api(url):
         response.raise_for_status()
         content = response.text
         if block_pattern.search(content):
-            match = re.search(r'Fu\s*=\s*"([^"]+)"', content)
+            match = re.search(r'$u\s*=\s*"([^"]+)"', content)
             header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
 
             if match and header:
