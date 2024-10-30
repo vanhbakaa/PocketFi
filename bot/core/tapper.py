@@ -137,7 +137,7 @@ class Tapper:
 
     async def claim_daily_rw(self, http_client: aiohttp.ClientSession):
         try:
-            response = await http_client.post("https://bot.pocketfi.org/boost/activateDailyBoost", ssl=False)
+            response = await http_client.post("https://rubot.pocketfi.org/boost/activateDailyBoost", ssl=False)
             response.raise_for_status()
 
             # response_json = await response.json()
@@ -161,7 +161,7 @@ class Tapper:
             logger.error(f"{self.session_name} | Unknown error when create account!: {error}")
             await asyncio.sleep(delay=randint(3, 7))
     async def check_daily(self, http_client: aiohttp.ClientSession):
-        response = await http_client.get("https://bot.pocketfi.org/boost/tasks?boostType=general", ssl=False)
+        response = await http_client.get("https://rubot.pocketfi.org/boost/tasks?boostType=general", ssl=False)
 
         if response.status == 200:
             data = await response.json()
