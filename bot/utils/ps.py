@@ -5,54 +5,6 @@ from bot.utils import logger
 
 baseUrl = "https://gm.pocketfi.org"
 
-block_pattern = re.compile(r"""
-    Oe\s*=\s*\{         # Matches 'Oe = {'
-    \s*addressActivityHook:\s*"/addressActivity",\s*
-    getStableCoinsAndEth:\s*"/getStableCoinsAndEth",\s*
-    startMonitoring:\s*"/startMonitoring",\s*
-    listNotificationsForUser:\s*"/listNotificationsForUser",\s*
-    tgSwap:\s*"/tgSwap",\s*
-    tgMakeSwap:\s*"/tgMakeSwap",\s*
-    tgUserWallets:\s*"/tgUserWallets",\s*
-    knownTokens:\s*"/knownTokens",\s*
-    fetchRoute:\s*"/fetchRoute",\s*
-    swap:\s*"/swap",\s*
-    balances:\s*"/balances",\s*
-    history:\s*"/history",\s*
-    totalBalance:\s*"/totalBalance",\s*
-    address:\s*"/address",\s*
-    transfer:\s*"/transfer",\s*
-    subscription:\s*"/getCopyTrades",\s*
-    postSubscription:\s*"/startMonitoringCopyTrade",\s*
-    cancelSubscription:\s*"/cancelCopyTrade",\s*
-    getUserTransaction:\s*"/getUserSwaps",\s*
-    createPresetSwap:\s*"/createPresetSwap",\s*
-    getPresetTokens:\s*"/getPresetTokens",\s*
-    createUserMining:\s*"/mining/createUserMining",\s*
-    getUserMining:\s*"/mining/getUserMining",\s*
-    claimMining:\s*"/mining/claimMining",\s*
-    miningTasks:\s*"/boost/tasks",\s*
-    setTonWallet:\s*"/mining/setTonWallet",\s*
-    miningGuilds:\s*"/mining/guilds",\s*
-    miningAlliancesGuilds:\s*"/mining/alliances/guilds",\s*
-    miningAlliances:\s*"/mining/alliances",\s*
-    setMiningAlliance:\s*"/mining/alliances/set",\s*
-    getMiningReferralStats:\s*"/mining/referralStats",\s*
-    burnPunks:\s*"/burnPunks",\s*
-    confirmSubscription:\s*"/confirmSubscription",\s*
-    activateDailyBoost:\s*"/boost/activateDailyBoost",\s*
-    getAirdrops:\s*"/boost/tasks",\s*
-    checkEmoji:\s*"/boost/checkEmoji",\s*
-    checkStakingPunks:\s*"/boost/checkPunkStaking",\s*
-    listFriends:\s*"/mining/listFriends",\s*
-    v2:\s*\{                 # Matches 'v2: {'
-    \s*simulateTonSwap:\s*"/v2/tc/simulate-swap",\s*
-    tonSwap:\s*"/v2/tc/swap"\s*
-    \}\s*                    # Matches '}'
-\}
-""", re.VERBOSE)
-
-
 def get_main_js_format(base_url):
     try:
         response = requests.get(base_url)
@@ -68,25 +20,24 @@ def get_main_js_format(base_url):
         logger.warning(f"Error fetching the base URL: {e}")
         return None
 
+
 def get_base_api(url):
     try:
         logger.info("Checking for changes in api...")
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
-        if block_pattern.search(content):
-            match = re.search(r'\$u\s*=\s*["\'](https?://[^\s"\']+)["\']', content)
-            header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
+        match = re.search(r'\$u\s*=\s*["\'](https?://[^\s"\']+)["\']', content)
+        header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
 
-            if match and header:
-                    # print(match)
-                    # print(header.group(1))
-                return [True, match.group(1), header.group(1)]
-            else:
-                logger.info("Could not find 'api' in the content.")
-                return None
+        if match and header:
+            # print(match)
+            # print(header.group(1))
+            return [True, match.group(1), header.group(1)]
         else:
+            logger.info("Could not find 'api' in the content.")
             return None
+
     except requests.RequestException as e:
         logger.warning(f"Error fetching the JS file: {e}")
         return None
