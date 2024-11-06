@@ -27,13 +27,12 @@ def get_base_api(url):
         response = requests.get(url)
         response.raise_for_status()
         content = response.text
-        match = re.search(r'\$u\s*=\s*["\'](https?://[^\s"\']+)["\']', content)
+        match = re.findall(r'\b\w+\s*=\s*"(https?://[^\s"]+)"', content)
         header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
 
         if match and header:
             # print(match)
-            # print(header.group(1))
-            return [True, match.group(1), header.group(1)]
+            return [True, match, header.group(1)]
         else:
             logger.info("Could not find 'api' in the content.")
             return None
@@ -65,7 +64,7 @@ def check_base_url():
             if result is None:
                 return False
 
-            if baseUrl in result[1] and result[2] == "Abvx2NzMTM==" and result[0]:
+            if baseUrl in result[1] and "https://bot.pocketfi.org" in result[1] and "https://rubot.pocketfi.org" in result[1] and result[2] == "Abvx2NzMTM==" and result[0]:
                 logger.success(f"<green>No change in all api!</green>")
                 return True
 
