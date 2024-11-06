@@ -10,7 +10,7 @@ from better_proxy import Proxy
 from pyrogram.errors import Unauthorized, UserDeactivated, AuthKeyUnregistered, FloodWait
 from pyrogram.raw.types import InputBotAppShortName
 from pyrogram.raw.functions.messages import RequestAppWebView
-from bot.core.agents import generate_random_user_agent
+from bot.core.agents import generate_random_user_agent, fetch_version
 from bot.config import settings
 
 from bot.utils import logger
@@ -22,6 +22,8 @@ from bot.utils.ps import check_base_url
 import sys
 
 api_login = "https://gm.pocketfi.org/mining/getUserMining"
+
+
 class Tapper:
     def __init__(self, tg_client: Client):
         self.tg_client = tg_client
@@ -106,7 +108,8 @@ class Tapper:
                 self.new_account = True
                 return
             else:
-                logger.info(f"{self.session_name} | <white>Balance: </white><cyan>{response_json['userMining']['gotAmount']}</cyan> | <white>Speed: </white><cyan>{response_json['userMining']['speed']}</cyan> | <white>Available for claim: </white><red>{response_json['userMining']['miningAmount']}</red>")
+                logger.info(
+                    f"{self.session_name} | <white>Balance: </white><cyan>{response_json['userMining']['gotAmount']}</cyan> | <white>Speed: </white><cyan>{response_json['userMining']['speed']}</cyan> | <white>Available for claim: </white><red>{response_json['userMining']['miningAmount']}</red>")
                 self.can_claim = float(response_json['userMining']['miningAmount'])
 
         except Exception as error:
@@ -160,6 +163,7 @@ class Tapper:
         except Exception as error:
             logger.error(f"{self.session_name} | Unknown error when create account!: {error}")
             await asyncio.sleep(delay=randint(3, 7))
+
     async def check_daily(self, http_client: aiohttp.ClientSession):
         response = await http_client.get("https://rubot.pocketfi.org/boost/tasks?boostType=general", ssl=False)
 
@@ -173,17 +177,20 @@ class Tapper:
                         return
         else:
             logger.info(f"{self.session_name} | Failed to fetch tasks list")
+
     async def run(self, proxy: str | None) -> None:
         access_token_created_time = 0
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
 
         headers["User-Agent"] = generate_random_user_agent(device_type='android', browser_type='chrome')
+        chrome_ver = fetch_version(headers['User-Agent'])
+        headers['Sec-Ch-Ua'] = f'"Chromium";v="{chrome_ver}", "Android WebView";v="{chrome_ver}", "Not.A/Brand";v="99"'
         http_client = CloudflareScraper(headers=headers, connector=proxy_conn)
 
         if proxy:
             await self.check_proxy(http_client=http_client, proxy=proxy)
 
-        token_live_time = randint(1*3600, 3*3600)
+        token_live_time = randint(1 * 3600, 3 * 3600)
         while True:
             can_run = True
             try:
@@ -201,10 +208,10 @@ class Tapper:
                         tg_web_data = await self.get_tg_web_data(proxy=proxy)
                         http_client.headers['telegramrawdata'] = tg_web_data
                         access_token_created_time = time()
-                        token_live_time = randint(1*3600, 3*3600)
-    
+                        token_live_time = randint(1 * 3600, 3 * 3600)
+
                         await asyncio.sleep(delay=randint(10, 15))
-    
+
                     await self.get_info_data(http_client)
                     if self.new_account is True:
                         await self.create_new_account(http_client)
@@ -213,11 +220,11 @@ class Tapper:
                     await self.check_daily(http_client)
                     if self.can_claim > 0.2:
                         await self.claim(http_client)
-    
+
                     sleep_time = round(uniform(2, 4), 1)
-    
+
                     logger.info(f"{self.session_name} | Sleep <y>{sleep_time}</y> hours")
-                    await asyncio.sleep(delay=sleep_time*3600)
+                    await asyncio.sleep(delay=sleep_time * 3600)
                 else:
                     await asyncio.sleep(120)
                     logger.info(f"{self.session_name} | Sleep <y>{120}</y> seconds...")
