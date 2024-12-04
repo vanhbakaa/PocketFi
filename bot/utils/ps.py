@@ -31,7 +31,7 @@ def get_base_api(url):
         header = re.search(r'"x-paf-t":\s*"([A-Za-z0-9=]+)"', content)
 
         if match and header:
-            # print(match)
+            print(match)
             return [True, match, header.group(1)]
         else:
             logger.info("Could not find 'api' in the content.")
@@ -69,7 +69,8 @@ def check_base_url():
                 return True
 
             else:
-                if baseUrl in result[0] and result[1] == "Abvx2NzMTM==":
+                if baseUrl in result[1] and result[2] == "Abvx2NzMTM==":
+
                     logger.success("<green>No change in api!</green>")
                     return True
             return False
